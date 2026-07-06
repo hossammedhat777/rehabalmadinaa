@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rehab MG - نظام إدارة المهام والأداء الذكي (KPI)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        rmgGreen: '#1B4332',
+                        rmgGreenLight: '#2A553E',
+                        rmgGold: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen pb-28">
+
+    <!-- ================= شاشة تسجيل الدخول ================= -->
+    <div id="login-page" class="fixed inset-0 bg-gray-100 flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl border border-gray-100 text-center space-y-6">
+            <div class="inline-flex w-16 h-16 bg-rmgGreen text-rmgGold rounded-full items-center justify-center shadow-lg text-2xl">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-rmgGreen">رحاب أم جي للمقاولات</h2>
+                <p class="text-xs text-gray-400 mt-1">منصة التكليفات الذكية وتقييم كفاءة الأداء الرقمي</p>
+            </div>
+
+            <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl font-semibold">
+                <i class="fa-solid fa-triangle-exclamation ml-1"></i> اسم المستخدم أو كلمة المرور غير صحيحة!
+            </div>
+
+            <div class="space-y-4 text-right">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1 font-semibold">اسم المستخدم</label>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3 focus-within:border-rmgGreen transition">
+                        <i class="fa-solid fa-user text-gray-400 text-sm"></i>
+                        <input type="text" id="login-username" placeholder="ادخل اسم المستخدم..." class="w-full bg-transparent outline-none text-sm text-gray-700" autocomplete="username">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1 font-semibold">كلمة المرور</label>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3 focus-within:border-rmgGreen transition">
+                        <i class="fa-solid fa-lock text-gray-400 text-sm"></i>
+                        <input type="password" id="login-password" placeholder="ادخل كلمة المرور..." class="w-full bg-transparent outline-none text-sm text-gray-700" autocomplete="current-password">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="handleLogin()" class="w-full bg-rmgGreen text-white py-3 rounded-xl font-bold shadow-md hover:bg-emerald-950 transition active:scale-[0.98]">
+                تسجيل الدخول <i class="fa-solid fa-arrow-left-to-bracket mr-2 text-xs"></i>
+            </button>
+            <div class="bg-gray-50 p-2.5 rounded-xl text-[10px] text-gray-400 text-right space-y-0.5 max-h-24 overflow-y-auto border border-gray-100">
+                <p class="font-bold border-b pb-0.5 mb-1 text-gray-500">حسابات الدخول للفريق:</p>
+                <p>حسام مدحت: hossam / 123456</p>
+                <p>محمود حمزة: mahmoud / 123456</p>
+                <p>عبدالرحمن سعيد: abdo / 123456</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= محتوى النظام الرئيسي ================= -->
+    <div id="main-app-content" class="hidden">
+        <!-- شريط الشركة العلوي -->
+        <div class="bg-rmgGreen text-white rounded-b-3xl p-6 shadow-lg max-w-xl mx-auto sticky top-0 z-30">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-rmgGold rounded-full flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-layer-group text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold tracking-wide">رحاب أم جي للمقاولات</h1>
+                </div>
+                <span class="text-xs bg-white/25 px-3 py-1 rounded-full text-gray-200">إصدار 2026 المحسن للإنتاجية</span>
+            </div>
+            <div class="bg-rmgGreenLight rounded-2xl p-4 flex items-center justify-between shadow-inner">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border border-white/10">
+                        <i class="fa-solid fa-user text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-300">المستعرض المالي والتشغيلي الحالي</p>
+                        <h2 id="current-user-display" class="text-base font-bold">حسام مدحت</h2>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="text-xs bg-red-600/80 hover:bg-red-700 px-3 py-2 rounded-xl text-white font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-from-bracket"></i> خروج
+                </button>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي والأقسام -->
+        <main class="max-w-xl mx-auto px-4 mt-6">
+            
+            <!-- ================= قسم المهام الحالية ================= -->
+            <div id="section-tasks" class="app-section space-y-4">
+                <div class="flex flex-col gap-2 mb-4">
+                    <div class="bg-white flex items-center gap-3 px-4 py-2.5 rounded-xl border border-gray-200 shadow-sm">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                        <input type="text" id="search-input" oninput="filterTasks()" placeholder="البحث باسم المهمة، الموظف، أو المشروع..." class="w-full bg-transparent outline-none text-sm text-gray-700">
+                    </div>
+                    <div id="active-filter-badge" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
+                        <span id="filter-text">يتم عرض مهام محددة</span>
+                        <button onclick="clearActiveFilter()" class="bg-amber-200 hover:bg-amber-300 px-2 py-1 rounded-md font-bold transition">عرض الكل</button>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-rmgGreen mb-3 flex justify-between items-center">
+                    <span>دورة حياة المهام الحالية</span>
+                    <span id="task-count" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded-full">0</span>
+                </h3>
+                <div id="tasks-container" class="space-y-4"></div>
+            </div>
+
+            <!-- ================= قسم المشاريع ================= -->
+            <div id="section-projects" class="app-section hidden space-y-4">
+                <h3 class="text-lg font-bold text-rmgGreen"><i class="fa-solid fa-diagram-project ml-2"></i>المشاريع الجارية (اضغط لعرض المهام)</h3>
+                <div id="projects-container" class="space-y-3"></div>
+            </div>
+
+            <!-- ================= قسم القطاعات ================= -->
+            <div id="section-sectors" class="app-section hidden space-y-4">
+                <h3 class="text-lg font-bold text-rmgGreen"><i class="fa-solid fa-chart-pie ml-2"></i>قطاعات العمل الهندسية (اضغط لعرض المهام)</h3>
+                <div id="sectors-container" class="space-y-3"></div>
+            </div>
+
+            <!-- ================= قسم المستودع والمخزون ================= -->
+            <div id="section-inventory" class="app-section hidden space-y-4">
+                <h3 class="text-lg font-bold text-rmgGreen"><i class="fa-solid fa-warehouse ml-2"></i>إدارة المستودع ومخزون المعدات</h3>
+                
+                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                    <h4 class="text-sm font-bold text-gray-700 border-b border-gray-100 pb-2"><i class="fa-solid fa-box-open text-rmgGold ml-1"></i> توريد معدة / مادة جديدة للمستودع</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">اسم المعدة / الأداة</label>
+                            <input type="text" id="inv-item-name" placeholder="مثال: دريل هيلتي شحن" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">الكمية المتوفرة</label>
+                            <input type="number" id="inv-item-qty" placeholder="مثال: 10" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                    </div>
+                    <button onclick="addInventoryItem()" class="w-full bg-rmgGreen text-white py-2 rounded-xl text-sm font-bold hover:bg-emerald-900 transition shadow-sm">إضافة للمستودع</button>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                    <h4 class="text-xs font-bold text-gray-400 mb-3">حالة المواد والمعدات داخل المستودع الحالي</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-100 text-gray-400 text-xs">
+                                    <th class="pb-2">المعدة / المادة</th>
+                                    <th class="pb-2 text-center">الرصيد الإجمالي</th>
+                                    <th class="pb-2 text-center">المتاح حالياً</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body" class="divide-y divide-gray-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= قسم الفريق و معدلات الـ KPI ================= -->
+            <div id="section-team" class="app-section hidden space-y-4">
+                <h3 class="text-lg font-bold text-rmgGreen flex items-center justify-between">
+                    <span><i class="fa-solid fa-users-gear ml-2"></i>لوحة الأداء وكفاءة الفريق (KPIs)</span>
+                </h3>
+                
+                <!-- لوحة مؤشرات الأداء السريعة للأفراد -->
+                <div class="bg-emerald-950 text-white p-4 rounded-2xl border border-emerald-900 shadow-md">
+                    <div class="flex items-center gap-2 mb-2 text-rmgGold font-bold text-sm">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span>قاعدة احتساب كفاءة المهام والمؤشر (KPI)</span>
+                    </div>
+                    <p class="text-gray-300 text-xs leading-relaxed">
+                        يتم تحليل أداء المهام ديناميكياً لكل مهندس ومشرف. يتم احتساب التقييم بناءً على معادلة الإنجاز الفعلي للمهام المقفلة والمسندة للفرد لتحقيق الشفافية الكاملة في المتابعة.
+                    </p>
+                </div>
+
+                <!-- نموذج إضافة موظف -->
+                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                    <h4 class="text-sm font-bold text-gray-700 border-b border-gray-100 pb-2"><i class="fa-solid fa-user-plus text-rmgGold ml-1"></i> إضافة موظف وتحديد قطاعه وبيانات دخوله</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">اسم الموظف الجديد</label>
+                            <input type="text" id="new-user-name" placeholder="الاسم" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">المسمى الوظيفي</label>
+                            <input type="text" id="new-user-role" placeholder="المهنة" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">اسم المستخدم (User)</label>
+                            <input type="text" id="new-user-username" placeholder="User" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">كلمة المرور (Password)</label>
+                            <input type="text" id="new-user-password" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[11px] text-gray-500 mb-1">القطاع الفني</label>
+                            <select id="new-user-sector" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                                <option value="إدارة الدعم والتقنية">إدارة الدعم والتقنية</option>
+                                <option value="الإدارة العامة والمالية">الإدارة العامة والمالية</option>
+                                <option value="إدارة الموارد اللوجستية">إدارة الموارد اللوجستية</option>
+                                <option value="إدارة المشروعات والتشطيبات">إدارة المشروعات والتشطيبات</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addUser()" class="w-full bg-rmgGreen text-white py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-900 transition">حفظ الموظف</button>
+                </div>
+
+                <!-- نموذج صرف عهدة معدات -->
+                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                    <h4 class="text-sm font-bold text-gray-700 border-b border-gray-100 pb-2"><i class="fa-solid fa-hand-holding-hand text-emerald-700 ml-1"></i> نموذج تسليم عهدة معدات من المستودع</h4>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">اختر الموظف المستلم</label>
+                            <select id="custody-user-select" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen"></select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">اختر المعدة</label>
+                                <select id="custody-item-select" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">الالكمية المسحوبة</label>
+                                <input type="number" id="custody-item-qty" value="1" min="1" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">ملاحظات الصرف والعهدة</label>
+                            <input type="text" id="custody-notes" placeholder="مثال: استخدام ميداني بالمشروع" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        </div>
+                    </div>
+                    <button onclick="assignCustody()" class="w-full bg-amber-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-amber-700 transition shadow-sm">إصدار وإسناد عهدة المعدات</button>
+                </div>
+
+                <!-- قائمة الموظفين واستعراض عهدهم والـ KPI المحدث لحظياً -->
+                <div id="users-list-container" class="space-y-3"></div>
+            </div>
+        </main>
+
+        <!-- الزر العائم لإنشاء مهمة جديدة -->
+        <div id="floating-btn" class="fixed bottom-24 left-6 z-40">
+            <button onclick="openModal()" class="w-14 h-14 bg-emerald-800 hover:bg-emerald-700 text-white rounded-full flex items-center justify-center shadow-xl transition transform active:scale-95">
+                <i class="fa-solid fa-plus text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- ================= شريط التنقل السفلي ================= -->
+        <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 shadow-2xl z-40">
+            <div class="max-w-xl mx-auto flex justify-around items-center px-2">
+                <div id="nav-tasks" onclick="switchSection('tasks', this)" class="nav-btn flex flex-col items-center gap-1 text-rmgGreen font-bold cursor-pointer transition">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                    <span class="text-xs">المهام</span>
+                </div>
+                <div id="nav-projects" onclick="switchSection('projects', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer transition">
+                    <i class="fa-solid fa-diagram-project text-lg"></i>
+                    <span class="text-xs">المشاريع</span>
+                </div>
+                <div id="nav-sectors" onclick="switchSection('sectors', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer transition">
+                    <i class="fa-solid fa-chart-pie text-lg"></i>
+                    <span class="text-xs">القطاعات</span>
+                </div>
+                <div id="nav-inventory" onclick="switchSection('inventory', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer transition">
+                    <i class="fa-solid fa-warehouse text-lg"></i>
+                    <span class="text-xs">المستودع</span>
+                </div>
+                <div id="nav-team" onclick="switchSection('team', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer transition">
+                    <i class="fa-solid fa-users text-lg"></i>
+                    <span class="text-xs">الفريق والـ KPI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- النافذة المنبثقة لإنشاء وتعديل المهام -->
+    <div id="task-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h3 id="modal-title" class="text-lg font-bold text-rmgGreen mb-4">إنشاء تكليف جديد</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">وصف المهمة الهندسية / الإدارية</label>
+                    <input type="text" id="modal-task-title" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">اسم المشروع</label>
+                    <input type="text" id="modal-task-project" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">المدة المتوقعة</label>
+                    <input type="text" id="modal-task-duration" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">القطاع المسؤول</label>
+                    <select id="modal-task-sector" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        <option value="إدارة المشروعات والتشطيبات">إدارة المشروعات والتشطيبات</option>
+                        <option value="إدارة الدعم والتقنية">إدارة الدعم والتقنية</option>
+                        <option value="الإدارة العامة والمالية">الإدارة العامة والمالية</option>
+                        <option value="إدارة الموارد اللوجستية">إدارة الموارد اللوجستية</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs text-gray-500">تعيين المستخدمين المسؤولين</label>
+                        <label class="flex items-center gap-1 text-xs text-rmgGreen font-bold cursor-pointer">
+                            <input type="checkbox" id="toggle-all-assignees" onchange="toggleSelectAllAssignees(this)"> اختيار الجميع
+                        </label>
+                    </div>
+                    <div id="modal-task-assignees-container" class="bg-gray-50 border border-gray-200 p-3 rounded-xl max-h-36 overflow-y-auto space-y-1.5"></div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">الحالة البدئية</label>
+                    <select id="modal-task-status" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm outline-none focus:border-rmgGreen">
+                        <option value="جديدة">جديدة</option>
+                        <option value="قيد الاستلام">قيد الاستلام</option>
+                        <option value="قيد التنفيذ">قيد التنفيذ</option>
+                        <option value="مكتملة">مكتملة</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="saveTask()" class="flex-1 bg-rmgGreen text-white py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-emerald-900 transition">حفظ التكليف</button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-600 py-2.5 rounded-xl text-sm transition hover:bg-gray-200">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- جافا سكريبت لتشغيل النظام المطور بمؤشرات KPI -->
+    <script>
+        // الطاقم الإداري والهندسي الجديد بالكامل مع حسابات الدخول المخصصة والقطاعات والعهَد
+        let users = [
+            { name: "حسام مدحت", role: "IT وتصميم", sector: "إدارة الدعم والتقنية", user: "hossam", pass: "123456", custodies: [] },
+            { name: "محمود حمزة", role: "مدير عام", sector: "الإدارة العامة والمالية", user: "mahmoud", pass: "123456", custodies: [] },
+            { name: "احمد حمزة", role: "مسؤول مشتريات", sector: "إدارة الموارد اللوجستية", user: "ahmed", pass: "123456", custodies: [] },
+            { name: "وليد العيادي", role: "محاسب", sector: "الإدارة العامة والمالية", user: "walid", pass: "123456", custodies: [] },
+            { name: "محمد حسين", role: "مدير حسابات", sector: "الإدارة العامة والمالية", user: "mhmed", pass: "123456", custodies: [] },
+            { name: "عبدالعزيز الجهني", role: "موارد بشرية وادارة لوجستية", sector: "إدارة الموارد اللوجستية", user: "aziz", pass: "123456", custodies: [] },
+            { name: "عبدالرحمن سعيد", role: "مهندس مدني", sector: "إدارة المشروعات والتشطيبات", user: "abdo", pass: "123456", custodies: [] },
+            { name: "زياد عبدالحميد", role: "مهندس مدني", sector: "إدارة المشروعات والتشطيبات", user: "ziad", pass: "123456", custodies: [] },
+            { name: "بهاء فريد", role: "مشرف", sector: "إدارة المشروعات والتشطيبات", user: "bahaa", pass: "123456", custodies: [] },
+            { name: "عصام احمد", role: "مشرف", sector: "إدارة المشروعات والتشطيبات", user: "essam", pass: "123456", custodies: [] }
+        ];
+
+        let inventory = [
+            { id: 1, name: "دريل هيلتي شحن", total: 8, available: 8 },
+            { id: 2, name: "جهاز ليفل ليزر ثلاثي الأبعاد", total: 5, available: 5 },
+            { id: 3, name: "سلم ألمنيوم تلسكوبي", total: 12, available: 12 }
+        ];
+
+        // عينة مهام بدئية لحساب الـ KPI بشكل حي ومباشر فور التشغيل
+        let tasks = [
+            { id: 1, title: 'مراجعة المخططات الهندسية وجداول التشطيبات والجبس بورد', project: 'مشروع الفيلات السكنية', sector: 'إدارة المشروعات والتشطيبات', assignees: ['عبدالرحمن سعيد', 'بهاء فريد'], status: 'قيد التنفيذ', duration: '3 أيام', timestamp: '2026-07-05', comments: [], images: [] },
+            { id: 2, title: 'توريد وتركيب مكيفات كاسيت للمطبخ الصناعي الرئيسي', project: 'مشروع SEDCO الاستثماري', sector: 'إدارة المشروعات والتشطيبات', assignees: ['عبدالرحمن سعيد', 'عصام احمد'], status: 'مكتملة', duration: 'يومين', timestamp: '2026-07-06', comments: [], images: [] },
+            { id: 3, title: 'تحديث تراخيص السيرفر وإعداد خطة النسخ الاحتياطي السحابية', project: 'نظام إدارة المهام الذكي', sector: 'إدارة الدعم والتقنية', assignees: ['حسام مدحت'], status: 'مكتملة', duration: '4 ساعات', timestamp: '2026-07-06', comments: [], images: [] }
+        ];
+
+        let currentActiveUser = "حسام مدحت";
+        let currentProjectFilter = null;
+        let currentSectorFilter = null;
+
+        const statusColors = {
+            'جديدة': { bg: 'bg-purple-100', text: 'text-purple-700', progress: 'w-1/4 bg-purple-500' },
+            'قيد الاستلام': { bg: 'bg-amber-100', text: 'text-amber-700', progress: 'w-2/4 bg-amber-500' },
+            'قيد التنفيذ': { bg: 'bg-blue-100', text: 'text-blue-700', progress: 'w-3/4 bg-blue-500' },
+            'مكتملة': { bg: 'bg-green-100', text: 'text-green-700', progress: 'w-full bg-green-600' }
+        };
+
+        function handleLogin() {
+            const uInput = document.getElementById('login-username').value.trim();
+            const pInput = document.getElementById('login-password').value.trim();
+            const foundUser = users.find(u => u.user === uInput && u.pass === pInput);
+
+            if (foundUser) {
+                currentActiveUser = foundUser.name;
+                document.getElementById('current-user-display').innerText = `${foundUser.name} (${foundUser.role})`;
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-app-content').classList.remove('hidden');
+                syncDropdowns();
+                applyFilterAndRender();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('main-app-content').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+        }
+
+        function switchSection(sectionId, clickedElement) {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+            document.getElementById('floating-btn').style.display = (sectionId === 'tasks') ? 'block' : 'none';
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('text-rmgGreen', 'font-bold'));
+            if(clickedElement) clickedElement.classList.add('text-rmgGreen', 'font-bold');
+
+            if (sectionId === 'tasks') applyFilterAndRender();
+            if (sectionId === 'projects') renderProjectsSummary();
+            if (sectionId === 'sectors') renderSectorsSummary();
+            if (sectionId === 'inventory') renderInventory();
+            if (sectionId === 'team') { syncDropdowns(); renderUsersList(); }
+        }
+
+        function addInventoryItem() {
+            const name = document.getElementById('inv-item-name').value.trim();
+            const qty = parseInt(document.getElementById('inv-item-qty').value);
+            if (!name || isNaN(qty) || qty <= 0) return alert('أدخل بيانات صحيحة للمعدة');
+
+            const item = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+            if(item) {
+                item.total += qty;
+                item.available += qty;
+            } else {
+                inventory.push({ id: Date.now(), name, total: qty, available: qty });
+            }
+            document.getElementById('inv-item-name').value = '';
+            document.getElementById('inv-item-qty').value = '';
+            renderInventory();
+            syncDropdowns();
+        }
+
+        function renderInventory() {
+            const tbody = document.getElementById('inventory-table-body');
+            tbody.innerHTML = inventory.map(item => `
+                <tr>
+                    <td class="py-3 font-bold text-gray-700">${item.name}</td>
+                    <td class="py-3 text-center text-gray-500">${item.total}</td>
+                    <td class="py-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">${item.available}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function syncDropdowns() {
+            const custodySelect = document.getElementById('custody-user-select');
+            if(custodySelect) custodySelect.innerHTML = users.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+
+            const itemSelect = document.getElementById('custody-item-select');
+            if(itemSelect) {
+                itemSelect.innerHTML = inventory.map(i => `<option value="${i.name}">${i.name} (المتاح: ${i.available})</option>`).join('');
+            }
+
+            const assigneesContainer = document.getElementById('modal-task-assignees-container');
+            if(assigneesContainer) {
+                assigneesContainer.innerHTML = users.map(u => `
+                    <label class="flex items-center justify-between text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-gray-100 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" value="${u.name}" class="task-assignee-checkbox accent-rmgGreen">
+                            <span class="font-semibold">${u.name}</span>
+                        </div>
+                        <span class="text-xs bg-gray-200/70 text-gray-600 px-2 py-0.5 rounded-md">${u.role}</span>
+                    </label>
+                `).join('');
+            }
+            document.getElementById('toggle-all-assignees').checked = false;
+        }
+
+        function toggleSelectAllAssignees(masterCheckbox) {
+            const checkboxes = document.querySelectorAll('.task-assignee-checkbox');
+            checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+        }
+
+        function addUser() {
+            const name = document.getElementById('new-user-name').value.trim();
+            const role = document.getElementById('new-user-role').value.trim() || 'موظف مالي/فني';
+            const sector = document.getElementById('new-user-sector').value;
+            const user = document.getElementById('new-user-username').value.trim();
+            const pass = document.getElementById('new-user-password').value.trim();
+
+            if(!name || !user || !pass) return alert('جميع بيانات الدخول والاسم مطلوبة لحفظ ملف الموظف والـ KPI');
+
+            users.push({ name, role, sector, user, pass, custodies: [] });
+            document.getElementById('new-user-name').value = '';
+            document.getElementById('new-user-role').value = '';
+            document.getElementById('new-user-username').value = '';
+            document.getElementById('new-user-password').value = '';
+            
+            renderUsersList();
+            syncDropdowns();
+        }
+
+        function assignCustody() {
+            const userName = document.getElementById('custody-user-select').value;
+            const notes = document.getElementById('custody-notes').value.trim() || 'بدون ملاحظات';
+            const user = users.find(u => u.name === userName);
+            if(!user) return;
+
+            const itemName = document.getElementById('custody-item-select').value;
+            const qty = parseInt(document.getElementById('custody-item-qty').value);
+            const invItem = inventory.find(i => i.name === itemName);
+
+            if (!invItem || invItem.available < qty) return alert('الكمية المطلوبة غير متوفرة بالمستودع الفعلي!');
+            
+            invItem.available -= qty;
+            user.custodies.push({ detail: `${itemName} (عدد ${qty})`, notes });
+
+            document.getElementById('custody-notes').value = '';
+            renderUsersList();
+            alert('تم ربط وإسناد عهدة الأجهزة والمعدات بنجاح للموظف.');
+        }
+
+        // دالة ديناميكية لحساب معدلات الأداء والـ KPI لكل موظف مبنية على مخرجات دورة المهام الفعالة
+        function calculateUserKPI(userName) {
+            const userTasks = tasks.filter(t => t.assignees.includes(userName));
+            const total = userTasks.length;
+            const completed = userTasks.filter(t => t.status === 'مكتملة').length;
+            const ongoing = userTasks.filter(t => t.status === 'قيد التنفيذ' || t.status === 'قيد الاستلام').length;
+            const pending = userTasks.filter(t => t.status === 'جديدة').length;
+
+            let kpi = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            let colorClass = "bg-red-500";
+            let textClass = "text-red-700";
+            if (kpi >= 75) { colorClass = "bg-green-600"; textClass = "text-green-700"; }
+            else if (kpi >= 40) { colorClass = "bg-amber-500"; textClass = "text-amber-700"; }
+
+            return { kpi, total, completed, ongoing, pending, colorClass, textClass };
+        }
+
+        function renderUsersList() {
+            const container = document.getElementById('users-list-container');
+            
+            // فرز تلقائي لعرض الأعلى إنتاجية في لوحة التقييم والـ KPI أولاً
+            let sortedUsers = [...users].map(u => {
+                return { ...u, stats: calculateUserKPI(u.name) };
+            }).sort((a, b) => b.stats.kpi - a.stats.kpi);
+
+            container.innerHTML = sortedUsers.map(u => {
+                let custodyItems = u.custodies.map(c => `
+                    <div class="text-[11px] bg-gray-50 p-2 rounded-lg border border-gray-100 flex justify-between">
+                        <span><strong class="text-blue-700">[عهدة]</strong> ${c.detail}</span>
+                        <span class="text-gray-400 text-[10px]">${c.notes}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                        <!-- القسم العلوي لمعلومات الموظف -->
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-user-tie text-rmgGreen"></i>
+                                    <span>${u.name}</span>
+                                </h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">${u.role} • ${u.sector}</p>
+                            </div>
+                            <div class="text-left text-[10px] bg-amber-50 border border-amber-200 text-amber-800 px-2 py-1 rounded-md">
+                                <div>User: <strong>${u.user}</strong></div>
+                                <div>Pass: <strong>${u.pass}</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- قسم مؤشرات الأداء والـ KPI -->
+                        <div class="bg-gray-50/70 p-3 rounded-xl border border-gray-100 space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-500"><i class="fa-solid fa-chart-line ml-1"></i> مؤشر كفاءة الإنجاز (KPI):</span>
+                                <span class="font-bold text-sm ${u.stats.textClass}">${u.stats.kpi}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                                <div class="h-full ${u.stats.colorClass} transition-all duration-500" style="width: ${u.stats.kpi}%"></div>
+                            </div>
+                            <!-- تفاصيل وإحصائيات الإنتاجية والمعدلات الميدانية -->
+                            <div class="grid grid-cols-4 gap-1 text-center pt-1 text-[10px] text-gray-600">
+                                <div class="bg-white p-1.5 rounded-md border border-gray-100">
+                                    <span class="block font-bold text-gray-400">الإجمالي</span>
+                                    <span class="text-xs font-bold text-gray-700">${u.stats.total}</span>
+                                </div>
+                                <div class="bg-white p-1.5 rounded-md border border-gray-100">
+                                    <span class="block font-bold text-green-500">منجزة</span>
+                                    <span class="text-xs font-bold text-green-600">${u.stats.completed}</span>
+                                </div>
+                                <div class="bg-white p-1.5 rounded-md border border-gray-100">
+                                    <span class="block font-bold text-blue-500">جاري تنفيذها</span>
+                                    <span class="text-xs font-bold text-blue-600">${u.stats.ongoing}</span>
+                                </div>
+                                <div class="bg-white p-1.5 rounded-md border border-gray-100">
+                                    <span class="block font-bold text-purple-500">جديدة</span>
+                                    <span class="text-xs font-bold text-purple-600">${u.stats.pending}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قسم عهَد المعدات والأدوات المسجلة -->
+                        <div class="space-y-1.5">
+                            <p class="text-[10px] font-bold text-gray-400"><i class="fa-solid fa-boxes-stacked ml-1"></i> عهَد المعدات والأصول الحالية:</p>
+                            ${custodyItems || '<p class="text-xs text-gray-400 italic">لا توجد عهَد مسجلة في المستودع الرقمي</p>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function changeTaskStatus(id, newStatus) {
+            const task = tasks.find(t => t.id === id);
+            if(task) { 
+                task.status = newStatus; 
+                applyFilterAndRender(); 
+                // تحديث قائمة الموظفين والأداء تلقائياً فور تعديل الحالات
+                if(!document.getElementById('section-team').classList.contains('hidden')) {
+                    renderUsersList();
+                }
+            }
+        }
+
+        function addComment(id) {
+            const input = document.getElementById(`comment-input-${id}`);
+            const text = input.value.trim();
+            if(!text) return;
+            const task = tasks.find(t => t.id === id);
+            if(task) {
+                task.comments.push({ author: currentActiveUser, text: text });
+                input.value = '';
+                applyFilterAndRender();
+            }
+        }
+
+        function handleImageUpload(event, id) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const task = tasks.find(t => t.id === id);
+                if(task) { task.images.push(e.target.result); applyFilterAndRender(); }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderTasks(list) {
+            const container = document.getElementById('tasks-container');
+            document.getElementById('task-count').innerText = list.length;
+            container.innerHTML = list.map(task => {
+                const style = statusColors[task.status] || { bg: 'bg-gray-100', text: 'text-gray-700', progress: 'w-0' };
+                
+                let commentsHTML = task.comments.map(c => `
+                    <div class="bg-gray-50 border border-gray-100 p-2 rounded-xl text-xs">
+                        <span class="font-bold text-rmgGreen">${c.author}:</span>
+                        <span class="text-gray-600">${c.text}</span>
+                    </div>
+                `).join('');
+
+                let imagesHTML = task.images.map(img => `
+                    <img src="${img}" class="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm" alt="مرفق">
+                `).join('');
+
+                let assigneesBadges = task.assignees.map(name => `<span class="bg-emerald-50 text-rmgGreen border border-emerald-200 px-2 py-0.5 rounded-md font-semibold text-[11px]">${name}</span>`).join(' ');
+
+                return `
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="${style.bg} ${style.text} text-xs font-bold px-2.5 py-1 rounded-lg">${task.status}</span>
+                                <select onchange="changeTaskStatus(${task.id}, this.value)" class="bg-gray-50 border border-gray-200 text-xs px-2 py-0.5 rounded-lg outline-none cursor-pointer">
+                                    <option value="" disabled selected>تحديث الحالة...</option>
+                                    <option value="جديدة">جديدة</option>
+                                    <option value="قيد الاستلام">قيد الاستلام</option>
+                                    <option value="قيد التنفيذ">قيد التنفيذ</option>
+                                    <option value="مكتملة">مكتملة</option>
+                                </select>
+                            </div>
+                            <button onclick="deleteTask(${task.id})" class="text-gray-400 hover:text-red-500 text-sm"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                        <h4 class="text-gray-800 font-bold text-base">${task.title}</h4>
+                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div class="h-full ${style.progress}"></div></div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 bg-gray-50 p-3 rounded-xl">
+                            <div>مشروع: <strong>${task.project}</strong></div>
+                            <div>قطاع: <strong>${task.sector}</strong></div>
+                            <div class="col-span-2 mt-2 pt-2 border-t border-gray-200/50">
+                                <div class="mb-1 text-gray-400">الفريق المعني بالتنفيذ:</div>
+                                <div class="flex flex-wrap gap-1.5">${assigneesBadges}</div>
+                            </div>
+                        </div>
+
+                        ${task.images.length > 0 ? `<div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100">${imagesHTML}</div>` : ''}
+
+                        <div class="space-y-2 border-t border-gray-100 pt-3">
+                            <p class="text-[11px] font-bold text-gray-400"><i class="fa-solid fa-comments ml-1"></i> مناقشات الإنجاز والملاحظات الفنية:</p>
+                            <div class="space-y-1.5 max-h-32 overflow-y-auto">${commentsHTML || '<p class="text-xs text-gray-400 italic">لا توجد مناقشات حتى الآن.</p>'}</div>
+                            
+                            <div class="flex items-center gap-2 pt-2">
+                                <input type="text" id="comment-input-${task.id}" placeholder="اكتب تحديثاً أو تعليقاً..." class="w-full bg-gray-50 border border-gray-200 text-xs px-3 py-2 rounded-xl outline-none focus:border-rmgGreen">
+                                <label class="bg-gray-100 text-gray-600 hover:bg-gray-200 p-2 rounded-xl cursor-pointer text-xs border border-gray-200">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <input type="file" accept="image/*" onchange="handleImageUpload(event, ${task.id})" class="hidden">
+                                </label>
+                                <button onclick="addComment(${task.id})" class="bg-rmgGreen text-white px-3 py-2 rounded-xl text-xs font-bold transition"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function filterByProject(p) { currentProjectFilter = p; currentSectorFilter = null; switchSection('tasks', null); }
+        function filterBySector(s) { currentSectorFilter = s; currentProjectFilter = null; switchSection('tasks', null); }
+        function clearActiveFilter() { currentProjectFilter = null; currentSectorFilter = null; document.getElementById('search-input').value = ''; applyFilterAndRender(); }
+        
+        function applyFilterAndRender() {
+            let filtered = tasks;
+            const badge = document.getElementById('active-filter-badge');
+            const text = document.getElementById('filter-text');
+
+            if (currentProjectFilter) {
+                filtered = tasks.filter(t => t.project === currentProjectFilter);
+                text.innerHTML = `مشروع: <strong>${currentProjectFilter}</strong>`;
+                badge.classList.remove('hidden');
+            } else if (currentSectorFilter) {
+                filtered = tasks.filter(t => t.sector === currentSectorFilter);
+                text.innerHTML = `قطاع: <strong>${currentSectorFilter}</strong>`;
+                badge.classList.remove('hidden');
+            } else { badge.classList.add('hidden'); }
+
+            const query = document.getElementById('search-input').value.toLowerCase();
+            if(query) {
+                filtered = filtered.filter(t => 
+                    t.title.toLowerCase().includes(query) || 
+                    t.assignees.some(name => name.toLowerCase().includes(query))
+                );
+            }
+            renderTasks(filtered);
+        }
+
+        function filterTasks() { applyFilterAndRender(); }
+
+        function renderProjectsSummary() {
+            const container = document.getElementById('projects-container');
+            container.innerHTML = '';
+            let counts = {}; tasks.forEach(t => counts[t.project || 'عام'] = (counts[t.project || 'عام'] || 0) + 1);
+            Object.keys(counts).forEach(p => {
+                container.innerHTML += `<div onclick="filterByProject('${p}')" class="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center text-sm cursor-pointer hover:border-rmgGold transition">
+                    <span class="font-bold text-gray-700"><i class="fa-solid fa-diagram-project text-rmgGold ml-2"></i>${p}</span>
+                    <span class="bg-rmgGreen text-white text-xs px-2.5 py-1 rounded-full font-bold">${counts[p]} مهام</span>
+                </div>`;
+            });
+        }
+
+        function renderSectorsSummary() {
+            const container = document.getElementById('sectors-container');
+            container.innerHTML = '';
+            let counts = {}; tasks.forEach(t => counts[t.sector] = (counts[t.sector] || 0) + 1);
+            Object.keys(counts).forEach(s => {
+                container.innerHTML += `<div onclick="filterBySector('${s}')" class="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center text-sm cursor-pointer hover:border-emerald-600 transition">
+                    <span class="font-bold text-gray-700"><i class="fa-solid fa-chart-pie text-emerald-600 ml-2"></i>${s}</span>
+                    <span class="bg-rmgGold text-rmgGreen text-xs px-2.5 py-1 rounded-full font-bold">${counts[s]} مهام</span>
+                </div>`;
+            });
+        }
+
+        function openModal() { syncDropdowns(); document.getElementById('task-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('task-modal').classList.add('hidden'); }
+        
+        function saveTask() {
+            const title = document.getElementById('modal-task-title').value.trim();
+            if(!title) return;
+
+            const selectedAssignees = [];
+            document.querySelectorAll('.task-assignee-checkbox:checked').forEach(cb => {
+                selectedAssignees.push(cb.value);
+            });
+
+            if(selectedAssignees.length === 0) return alert('يرجى تعيين موظف واحد على الأقل للمهمة لحساب كفاءة الأداء!');
+
+            tasks.unshift({
+                id: Date.now(),
+                title,
+                project: document.getElementById('modal-task-project').value.trim() || 'عام',
+                sector: document.getElementById('modal-task-sector').value,
+                assignees: selectedAssignees,
+                status: document.getElementById('modal-task-status').value,
+                duration: document.getElementById('modal-task-duration').value || 'غير محددة',
+                timestamp: '2026-07-06', comments: [], images: []
+            });
+            applyFilterAndRender();
+            closeModal();
+        }
+
+        function deleteTask(id) { if(confirm('حذف المهمة؟ سينعكس الحذف على الـ KPI للفريق.')) { tasks = tasks.filter(t => t.id !== id); applyFilterAndRender(); } }
+    </script>
+</body>
+</html>
